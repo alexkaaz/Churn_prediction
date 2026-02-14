@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Переменные клиента телеком</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; }
+        h2 { color: #333; }
+        p { margin-bottom: 15px; }
+        label { display: inline-block; width: 180px; }
+        select, input[type="number"] { padding: 5px; width: 200px; }
+        button { padding: 10px 25px; background: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005fa3; }
+    </style>
+</head>
+<body>
+    <h2>Выбор переменных клиента</h2>
+    <form method="post" action="/submit">
+        <p><label>Gender:</label> <select name="gender"><option value="Female">Female</option><option value="Male">Male</option></select></p>
+        
+        <p><label>Senior Citizen:</label> <select name="SeniorCitizen"><option value="0">0</option><option value="1">1</option></select></p>
+        
+        <p><label>Partner:</label> <select name="Partner"><option value="Yes">Yes</option><option value="No">No</option></select></p>
+        
+        <p><label>Dependents:</label> <select name="Dependents"><option value="Yes">Yes</option><option value="No">No</option></select></p>
+        
+        <p><label>Tenure (месяцы):</label> <input type="number" name="tenure" step="1" min="0"></p>
+        
+        <p><label>Phone Service:</label> <select name="PhoneService"><option value="Yes">Yes</option><option value="No">No</option></select></p>
+        
+        <p><label>Multiple Lines:</label> <select name="MultipleLines"><option value="Yes">Yes</option><option value="No">No</option><option value="No phone Service">No phone Service</option></select></p>
+        
+        <p><label>Internet Service:</label> <select name="InternetService"><option value="Fiber optic">Fiber optic</option><option value="DSL">DSL</option><option value="No">No</option></select></p>
+        
+        <p><label>Online Security:</label> <select name="OnlineSecurity"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
+        
+        <p><label>Online Backup:</label> <select name="OnlineBackup"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
+        
+        <p><label>Device Protection:</label> <select name="DeviceProtection"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
+        
+        <p><label>Tech Support:</label> <select name="TechSupport"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
+        
+        <p><label>Streaming TV:</label> <select name="StreamingTV"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
+        
+        <p><label>Streaming movie:</label> <select name="StreamingMovies"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
+        
+        <p><label>Contract:</label> <select name="Contract"><option value="Month-to-month">Month-to-month</option><option value="Two year">Two year</option><option value="One Year">One Year</option></select></p>
+        
+        <p><label>Paperless Billing:</label> <select name="PaperlessBilling"><option value="Yes">Yes</option><option value="No">No</option></select></p>
+        
+        <p><label>Payment Method:</label> <select name="PaymentMethod"><option value="Electronic check">Electronic check</option><option value="Mailed check">Mailed check</option><option value="Bank transfer (automatic)">Bank transfer (automatic)</option><option value="Credit card (automatic)">Credit card (automatic)</option></select></p>
+        
+        <p><label>Monthly Charges:</label> <input type="number" name="MonthlyCharges" step="0.01" min="0"></p>
+        
+        <p><label>Total Charges:</label> <input type="number" name="TotalCharges" step="0.01" min="0"></p>
+        <hr>
+        <button type="submit">Отправить</button>
+    </form>
+</body>
+</html>
