@@ -2,59 +2,152 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Переменные клиента телеком</title>
+    <title>Загрузка JSON файла</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; }
-        h2 { color: #333; }
-        p { margin-bottom: 15px; }
-        label { display: inline-block; width: 180px; }
-        select, input[type="number"] { padding: 5px; width: 200px; }
-        button { padding: 10px 25px; background: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #005fa3; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .drop-zone {
+            border: 3px dashed #0077cc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: #f0f8ff;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .drop-zone.dragover {
+            background: #e3f2fd;
+            border-color: #005fa3;
+        }
+        button {
+            background: #0077cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        input[type="file"] {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h2>Выбор переменных клиента</h2>
-    <form method="post" action="/submit">
-        <p><label>Gender:</label> <select name="gender"><option value="Female">Female</option><option value="Male">Male</option></select></p>
-        
-        <p><label>Senior Citizen:</label> <select name="SeniorCitizen"><option value="0">0</option><option value="1">1</option></select></p>
-        
-        <p><label>Partner:</label> <select name="Partner"><option value="Yes">Yes</option><option value="No">No</option></select></p>
-        
-        <p><label>Dependents:</label> <select name="Dependents"><option value="Yes">Yes</option><option value="No">No</option></select></p>
-        
-        <p><label>Tenure (месяцы):</label> <input type="number" name="tenure" step="1" min="0"></p>
-        
-        <p><label>Phone Service:</label> <select name="PhoneService"><option value="Yes">Yes</option><option value="No">No</option></select></p>
-        
-        <p><label>Multiple Lines:</label> <select name="MultipleLines"><option value="Yes">Yes</option><option value="No">No</option><option value="No phone Service">No phone Service</option></select></p>
-        
-        <p><label>Internet Service:</label> <select name="InternetService"><option value="Fiber optic">Fiber optic</option><option value="DSL">DSL</option><option value="No">No</option></select></p>
-        
-        <p><label>Online Security:</label> <select name="OnlineSecurity"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
-        
-        <p><label>Online Backup:</label> <select name="OnlineBackup"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
-        
-        <p><label>Device Protection:</label> <select name="DeviceProtection"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
-        
-        <p><label>Tech Support:</label> <select name="TechSupport"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
-        
-        <p><label>Streaming TV:</label> <select name="StreamingTV"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
-        
-        <p><label>Streaming movie:</label> <select name="StreamingMovies"><option value="Yes">Yes</option><option value="No">No</option><option value="No internet service">No internet service</option></select></p>
-        
-        <p><label>Contract:</label> <select name="Contract"><option value="Month-to-month">Month-to-month</option><option value="Two year">Two year</option><option value="One Year">One Year</option></select></p>
-        
-        <p><label>Paperless Billing:</label> <select name="PaperlessBilling"><option value="Yes">Yes</option><option value="No">No</option></select></p>
-        
-        <p><label>Payment Method:</label> <select name="PaymentMethod"><option value="Electronic check">Electronic check</option><option value="Mailed check">Mailed check</option><option value="Bank transfer (automatic)">Bank transfer (automatic)</option><option value="Credit card (automatic)">Credit card (automatic)</option></select></p>
-        
-        <p><label>Monthly Charges:</label> <input type="number" name="MonthlyCharges" step="0.01" min="0"></p>
-        
-        <p><label>Total Charges:</label> <input type="number" name="TotalCharges" step="0.01" min="0"></p>
-        <hr>
-        <button type="submit">Отправить</button>
+    <h2>Загрузите JSON файл с данными клиента</h2>
+    
+    <!-- Скрытая форма для отправки -->
+    <form method="post" action="/submit" enctype="multipart/form-data" id="uploadForm">
+        <input type="file" name="file" id="fileInput" accept=".json" required>
     </form>
+    
+    <!-- Зона drag-and-drop -->
+    <div class="drop-zone" id="dropZone">
+        <button type="button" id="browseBtn">Выберите файл</button>
+    </div>
+    
+    <p>Выбран: <span id="fileName"></span></p>
+    <button type="button" id="uploadBtn" style="display: none;">Загрузить файл</button>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileName = document.getElementById('fileName');
+        
+        let selectedFile = null;
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.json')) {
+                selectedFile = file;
+                fileName.textContent = file.name;
+                uploadBtn.style.display = 'inline-block';
+                
+                // Добавляем файл в input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+            } else {
+                alert('Пожалуйста, выберите JSON файл');
+            }
+        });
+        
+        browseBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files[0]) {
+                selectedFile = fileInput.files[0];
+                fileName.textContent = selectedFile.name;
+                uploadBtn.style.display = 'inline-block';
+            }
+        });
+        
+        // При нажатии на кнопку "Загрузить" отправляем форму
+        uploadBtn.addEventListener('click', () => {
+            if (selectedFile) {
+                console.log('Отправка файла:', selectedFile.name);
+                uploadForm.submit(); // Отправляем форму - произойдет перезагрузка страницы
+            }
+        });
+        
+        // ИЛИ альтернатива - отправка через AJAX без перезагрузки
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Загрузка...';
+            
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    alert('Ошибка при загрузке');
+                }
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '⬆ Загрузить файл';
+            }
+        });
+        
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+    </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form 
+from fastapi import FastAPI, File, UploadFile 
 from fastapi.responses import HTMLResponse, FileResponse
 import pandas as pd
 import json
@@ -28,43 +28,10 @@ async def form_page():
     return FileResponse(HTML_FORM)
 
 @app.post("/submit", response_class=HTMLResponse)
-async def submit_form(
-    gender: str = Form(...),
-    SeniorCitizen: str = Form(...),
-    Partner: str = Form(...),
-    Dependents: str = Form(...),
-    tenure: str = Form(...),
-    PhoneService: str = Form(...),
-    MultipleLines: str = Form(...),
-    InternetService: str = Form(...),
-    OnlineSecurity: str = Form(...),
-    OnlineBackup: str = Form(...),
-    DeviceProtection: str = Form(...),
-    TechSupport: str = Form(...),
-    StreamingTV: str = Form(...),
-    StreamingMovies: str = Form(...),
-    Contract: str = Form(...),
-    PaperlessBilling: str = Form(...),
-    PaymentMethod: str = Form(...),
-    MonthlyCharges: str = Form(...),
-    TotalCharges: str = Form(...)
-):
-    data = {k: v for k, v in locals().items() if k not in ['request']}
-    
-    # Преобразуем числовые данные
-    numeric_fields = {
-        'tenure': int,
-        'monthlycharges': float,
-        'totalcharges': float
-    }
-    for field, dtype in numeric_fields.items():
-        if field in data and data[field]:
-            try:
-                data[field] = dtype(data[field])
-            except:
-                data[field] = 0
-        else:
-            data[field] = 0
+async def submit_form(file: UploadFile = File(...)):
+    content = await file.read()
+    data = json.loads(content)
+    X = pd.DataFrame([data.copy()])
     
     # Сохраняем данные запроса 
     timestamp = datetime.now().isoformat()
@@ -76,19 +43,14 @@ async def submit_form(
     # Получаем предсказание модели
     prediction = None
     probability = None
-    error_msg = None
     
-    if model is not None:
-        try:
-            X = pd.DataFrame([data.copy()])
-            proba = model.predict_proba(X)[0]
-            prediction = int(model.predict(X)[0])
-            probability = float(max(proba))
-        except Exception as e:
-            error_msg = str(e)
-            prediction = "error"
-    else:
-        error_msg = "Модель не загружена"
+    try:
+        proba = model.predict_proba(X)[0]
+        prediction = int(model.predict(X)[0])
+        probability = float(max(proba))
+    except Exception as e:
+        prediction = "error"
+        probability = "error"
     
     # Генерируем HTML-страницу с результатом
     # Определяем текст предсказания
@@ -122,26 +84,16 @@ async def submit_form(
         <body>
             <div class="card">
                 <h1>Результат анализа клиента</h1>
-        """
+                <div class="prediction">{pred_label}</div>
+                <div class="probability">Вероятность: <strong>{probability:.1%}</strong></div>'
     
-    if error_msg:
-        html_result += f'<div class="error">{error_msg}</div>'
-    elif prediction in (0, 1):
-        html_result += f"""
-        <div class="prediction">{pred_label}</div>
-        {f'<div class="probability">Вероятность: <strong>{probability:.1%}</strong></div>' if probability else ''}
-        """
-    else:
-        html_result += f'<div class="error">{pred_label}</div>'
-    
-    html_result += f"""
-        <div class="details">
-            <p><strong>Данные сохранены в файл:</strong> {filename}</p>
-            <p><strong>Время отправки:</strong> {timestamp}</p>
-        </div>
-        <a href="/" class="button">← Вернуться к форме</a>
-        </div>
-    </body>
-    </html>"""
+                <div class="details">
+                    <p><strong>Данные сохранены в файл:</strong> {filename}</p>
+                    <p><strong>Время отправки:</strong> {timestamp}</p>
+                </div>
+                <a href="/" class="button">Вернуться к форме</a>
+            </div>
+        </body>
+        </html>"""
     
     return HTMLResponse(content=html_result)
