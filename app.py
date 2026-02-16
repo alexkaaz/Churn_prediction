@@ -8,7 +8,7 @@ from datetime import datetime
 
 app = FastAPI()
 
-model_path = "best_model.pkl"
+model_path = "model/best_model.pkl"
 model = None
 
 if os.path.exists(model_path):

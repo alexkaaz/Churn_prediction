@@ -1,5 +1,6 @@
-churn
-__pycache__
-best_model.pkl
+__pycache__/
+*.pyc
+.env
+logs/
+churn/
 Telco_Churn.csv
-logs
